@@ -7,6 +7,9 @@ spring:
     multipart:
       enabled: true #开启文件上传
       max-file-size: 10MB #限制文件上传大小为10M
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 mybatis:
   mapper-locations:
@@ -30,15 +33,13 @@ redis:
 secure:
   ignored:
     urls: #安全路径白名单
-      - /swagger-ui.html
-      - /swagger-resources/**
-      - /swagger/**
-      - /**/v2/api-docs
-      - /**/*.js
-      - /**/*.css
-      - /**/*.png
-      - /**/*.ico
-      - /webjars/springfox-swagger-ui/**
+      - /swagger-ui/
+      - /v3/api-docs/*
+      - /*/*.html
+      - /*/*.js
+      - /*/*.css
+      - /*/*.png
+      - /favicon.ico
       - /actuator/**
       - /druid/**
       - /admin/login
@@ -46,6 +47,25 @@ secure:
       - /admin/info
       - /admin/logout
       - /minio/upload
+      - /aliyun/oss/policy
+
+springdoc:
+  swagger-ui:
+    # 修改Swagger UI路径
+    path: /swagger-ui.html
+    # 开启Swagger UI界面
+    enabled: true
+    # 用于配置tag和operation的展开方式，这里配置为都不展开
+    doc-expansion: 'none'
+  api-docs:
+    # 修改api-docs路径
+    path: /v3/api-docs
+    # 开启api-docs
+    enabled: true
+  group-configs:
+    - group: 'default'
+      packages-to-scan: com.macro.mall.controller
+  default-flat-param-object: false
 
 aliyun:
   oss:
@@ -56,12 +76,6 @@ aliyun:
     policy:
       expire: 300 # 签名有效期(S)
     maxSize: 10 # 上传文件大小(M)
-    callback: http://39.98.190.128:8080/aliyun/oss/callback # 文件上传成功后的回调地址
+    callback: http://localhost:8080/aliyun/oss/callback # 文件上传成功后的回调地址
     dir:
       prefix: mall/images/ # 上传文件夹路径前缀
-
-minio:
-  endpoint: http://192.168.3.101:9090 #MinIO服务所在地址
-  bucketName: mall #存储桶名称
-  accessKey: minioadmin #访问的key
-  secretKey: minioadmin #访问的秘钥

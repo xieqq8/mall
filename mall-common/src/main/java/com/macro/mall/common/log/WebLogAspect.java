@@ -4,7 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.json.JSONUtil;
 import com.macro.mall.common.domain.WebLog;
-import io.swagger.annotations.ApiOperation;
+import com.macro.mall.common.util.RequestUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import net.logstash.logback.marker.Markers;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -15,13 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -63,14 +63,15 @@ public class WebLogAspect {
         Signature signature = joinPoint.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
         Method method = methodSignature.getMethod();
-        if (method.isAnnotationPresent(ApiOperation.class)) {
-            ApiOperation log = method.getAnnotation(ApiOperation.class);
-            webLog.setDescription(log.value());
+        if (method.isAnnotationPresent(Operation.class)) {
+            Operation log = method.getAnnotation(Operation.class);
+            webLog.setDescription(log.summary());
         }
         long endTime = System.currentTimeMillis();
         String urlStr = request.getRequestURL().toString();
         webLog.setBasePath(StrUtil.removeSuffix(urlStr, URLUtil.url(urlStr).getPath()));
-        webLog.setIp(request.getRemoteUser());
+        webLog.setUsername(request.getRemoteUser());
+        webLog.setIp(RequestUtil.getRequestIp(request));
         webLog.setMethod(request.getMethod());
         webLog.setParameter(getParameter(method, joinPoint.getArgs()));
         webLog.setResult(result);
@@ -106,11 +107,13 @@ public class WebLogAspect {
             if (requestParam != null) {
                 Map<String, Object> map = new HashMap<>();
                 String key = parameters[i].getName();
-                if (!StringUtils.isEmpty(requestParam.value())) {
+                if (!StrUtil.isEmpty(requestParam.value())) {
                     key = requestParam.value();
                 }
-                map.put(key, args[i]);
-                argList.add(map);
+                if(args[i]!=null){
+                    map.put(key, args[i]);
+                    argList.add(map);
+                }
             }
         }
         if (argList.size() == 0) {

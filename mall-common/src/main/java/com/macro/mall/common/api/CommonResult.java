@@ -1,12 +1,21 @@
 package com.macro.mall.common.api;
 
 /**
- * 通用返回对象
+ * 通用返回结果封装类
  * Created by macro on 2019/4/19.
  */
 public class CommonResult<T> {
+    /**
+     * 状态码
+     */
     private long code;
+    /**
+     * 提示信息
+     */
     private String message;
+    /**
+     * 数据封装
+     */
     private T data;
 
     protected CommonResult() {

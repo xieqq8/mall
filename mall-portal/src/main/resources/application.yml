@@ -3,6 +3,9 @@ spring:
     name: mall-portal
   profiles:
     active: dev #默认为开发环境
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 mybatis:
   mapper-locations:
@@ -18,21 +21,37 @@ jwt:
 secure:
   ignored:
     urls: #安全路径白名单
-      - /swagger-ui.html
-      - /swagger-resources/**
-      - /swagger/**
-      - /**/v2/api-docs
-      - /**/*.js
-      - /**/*.css
-      - /**/*.png
-      - /**/*.ico
-      - /webjars/springfox-swagger-ui/**
-      - /druid/**
+      - /swagger-ui/
+      - /v3/api-docs/*
+      - /*/*.html
+      - /*/*.js
+      - /*/*.css
+      - /*/*.png
+      - /favicon.ico
       - /actuator/**
+      - /druid/**
       - /sso/**
       - /home/**
       - /product/**
       - /brand/**
+      - /alipay/**
+
+springdoc:
+  swagger-ui:
+    # 修改Swagger UI路径
+    path: /swagger-ui.html
+    # 开启Swagger UI界面
+    enabled: true
+    # 用于配置tag和operation的展开方式，这里配置为都不展开
+    doc-expansion: 'none'
+  api-docs:
+    # 修改api-docs路径
+    path: /v3/api-docs
+    # 开启api-docs
+    enabled: true
+  group-configs:
+    - group: 'mall-portal'
+      packages-to-scan: com.macro.mall.portal.controller
 
 # 自定义redis key
 redis:
@@ -44,6 +63,10 @@ redis:
   expire:
     authCode: 90 # 验证码超期时间
     common: 86400 # 24小时
+
+mongo:
+  insert:
+    sqlEnable: true # 用于控制是否通过数据库数据来插入mongo
 
 # 消息队列定义
 rabbitmq:

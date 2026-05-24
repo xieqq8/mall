@@ -1,33 +1,30 @@
 package com.macro.mall.controller;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
 import com.macro.mall.common.api.CommonResult;
 import com.macro.mall.dto.BucketPolicyConfigDto;
 import com.macro.mall.dto.MinioUploadDto;
 import io.minio.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * MinIO对象存储管理
+ * MinIO对象存储管理Controller
  * Created by macro on 2019/12/25.
  */
-@Api(tags = "MinioController", description = "MinIO对象存储管理")
 @Controller
+@Tag(name = "MinioController", description = "MinIO对象存储管理")
 @RequestMapping("/minio")
 public class MinioController {
 
@@ -41,10 +38,10 @@ public class MinioController {
     @Value("${minio.secretKey}")
     private String SECRET_KEY;
 
-    @ApiOperation("文件上传")
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @Operation(summary = "文件上传")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public CommonResult upload(@RequestParam("file") MultipartFile file) {
+    public CommonResult upload(@RequestPart("file") MultipartFile file) {
         try {
             //创建一个MinIO的Java客户端
             MinioClient minioClient =MinioClient.builder()
@@ -87,6 +84,9 @@ public class MinioController {
         return CommonResult.failed();
     }
 
+    /**
+     * 创建存储桶的访问策略，设置为只读权限
+     */
     private BucketPolicyConfigDto createBucketPolicyConfigDto(String bucketName) {
         BucketPolicyConfigDto.Statement statement = BucketPolicyConfigDto.Statement.builder()
                 .Effect("Allow")
@@ -99,7 +99,7 @@ public class MinioController {
                 .build();
     }
 
-    @ApiOperation("文件删除")
+    @Operation(summary = "文件删除")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult delete(@RequestParam("objectName") String objectName) {
